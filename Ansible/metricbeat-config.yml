@@ -1,3 +1,35 @@
+---
+- name: Installing and Launch Filebeat
+  hosts: webservers
+  become: yes
+  tasks:
+
+  - name: Download filebeat .deb file
+    command: curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.4.0-amd64.deb
+
+  - name: Install filebeat .deb
+    command: dpkg -i filebeat-7.4.0-amd64.deb
+
+  - name: Drop in filebeat.yml
+    copy:
+      src: /etc/ansible/filebeat-config.yml
+      dest: /etc/filebeat/filebeat.yml
+
+  - name: Enable and Configure System Module
+    command: filebeat modules enable system
+
+  - name: Setup filebeat
+    command: filebeat setup
+
+  - name: Start filebeat service
+    command: service filebeat start
+
+  - name: enable service filebeat on boot
+    systemd:
+      name: filebeat
+      enabled: yes
+root@619245d9995d:/etc/ansible/files# nano metricbeat-config.yml
+root@619245d9995d:/etc/ansible/files# cat metricbeat-config.yml
 ###################### Metricbeat Configuration Example #######################
 
 # This file is an example configuration file highlighting only the most common
@@ -59,7 +91,7 @@ setup.template.settings:
 # Starting with Beats version 6.0.0, the dashboards are loaded via the Kibana API.
 # This requires a Kibana endpoint configuration.
 setup.kibana:
-  host: "10.2.0.4:5601"
+  host: "10.1.0.4:5601"
 
   # Kibana Host
   # Scheme and port can be left out and will be set to the default (http and 5601)
@@ -92,7 +124,7 @@ setup.kibana:
 #-------------------------- Elasticsearch output ------------------------------
 output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: ["10.2.0.4:9200"]
+  hosts: ["10.1.0.4:9200"]
   username: "elastic"
   password: "changeme"
 
